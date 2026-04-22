@@ -1,0 +1,30 @@
+services:
+  fieldservice-server:
+    build:
+      context: .
+      dockerfile: src/FieldService.Server/Dockerfile
+    image: fieldservice-server:local
+    container_name: fieldservice-server
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__Default: Data Source=/data/fieldservice.db
+    volumes:
+      - fieldservice_data:/data
+    restart: unless-stopped
+    expose:
+      - "8080"
+
+  fieldservice-client:
+    build:
+      context: .
+      dockerfile: src/FieldService.Client/Dockerfile
+    image: fieldservice-client:local
+    container_name: fieldservice-client
+    depends_on:
+      - fieldservice-server
+    ports:
+      - "8081:80"
+    restart: unless-stopped
+
+volumes:
+  fieldservice_data:

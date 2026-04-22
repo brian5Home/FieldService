@@ -1,0 +1,11 @@
+**/bin/
+**/obj/
+**/.vs/
+**/.vscode/
+**/.idea/
+**/node_modules/
+terminals/
+agent-transcripts/
+.git/
+.gitignore
+README.md

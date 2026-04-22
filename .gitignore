@@ -1,0 +1,43 @@
+# Build output
+**/bin/
+**/obj/
+
+# User/editor files
+.vs/
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Test and coverage output
+TestResults/
+coverage/
+*.coverage
+*.coveragexml
+
+# Logs and temp files
+*.log
+*.tmp
+*.temp
+
+# Local databases and WAL files
+*.db
+*.db-shm
+*.db-wal
+
+# EF Core local design-time artifacts
+**/Migrations/*.Designer.cs
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker / local overrides
+docker-compose.override.yml
+
+# Cursor/local tooling artifacts
+.cursor/
+terminals/
+agent-transcripts/

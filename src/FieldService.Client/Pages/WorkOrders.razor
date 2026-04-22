@@ -1,0 +1,61 @@
+@page "/"
+@page "/work-orders"
+@using FieldService.Client.Data
+@using FieldService.Client.Sync
+@using FieldService.Shared.Domain
+@inject WorkOrderRepository Repo
+@inject ISyncService Sync
+
+<h1>Today's work orders</h1>
+<p>Status: @_state</p>
+
+@if (_orders is null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <ul>
+    @foreach (var wo in _orders)
+    {
+        <li>
+            <strong>@wo.Number</strong> — @wo.Title (@wo.Status, v@(wo.Version))
+            <button @onclick="() => Advance(wo)">Advance status</button>
+        </li>
+    }
+    </ul>
+}
+
+@code {
+    List<WorkOrder>? _orders;
+    SyncState _state = SyncState.Idle;
+
+    // In a real app, the logged-in technician would come from the auth context.
+    Guid _techId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+
+    protected override async Task OnInitializedAsync()
+    {
+        Sync.StateChanged += s => InvokeAsync(() => { _state = s; StateHasChanged(); });
+        await Refresh();
+    }
+
+    async Task Refresh()
+    {
+        _orders = await Repo.ListForTechnicianAsync(_techId, CancellationToken.None);
+    }
+
+    async Task Advance(WorkOrder wo)
+    {
+        var next = wo.Status switch
+        {
+            WorkOrderStatus.Scheduled => WorkOrderStatus.EnRoute,
+            WorkOrderStatus.EnRoute   => WorkOrderStatus.OnSite,
+            WorkOrderStatus.OnSite    => WorkOrderStatus.Completed,
+            _                         => wo.Status
+        };
+        if (next == wo.Status) return;
+        await Repo.UpdateStatusAsync(wo.Id, next, CancellationToken.None);
+        await Refresh();
+        _ = Sync.SyncOnceAsync();  // optimistic nudge; the background loop would catch it anyway
+    }
+}
